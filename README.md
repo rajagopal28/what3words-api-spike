@@ -25,7 +25,7 @@ You can find the API reference for the what3words API here:
 There is also a java wrapper which you can use here:
 [https://developer.what3words.com/tutorial/java](https://developer.what3words.com/tutorial/java)
 
-To save time we have created the api key: `XXXXXX` for use in this application.
+To save time we have created the api key: `92RKJSSS` for use in this application.
 
 API endpoints: The API will need to receive and respond in JSON.
 
