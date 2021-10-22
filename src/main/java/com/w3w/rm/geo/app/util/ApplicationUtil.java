@@ -1,5 +1,6 @@
 package com.w3w.rm.geo.app.util;
 
+import com.w3w.rm.geo.app.dto.EmergencyReportsInfoDTO;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Matcher;
@@ -16,5 +17,17 @@ public interface ApplicationUtil {
             return matcher.find();
         }
         return false;
+    }
+
+    static boolean validateEmergencyReportsRequest(EmergencyReportsInfoDTO request) {
+        return (request.getLatitude() != null &&
+                request.getLongitude() != null) ||
+                validate3WaString(request.getWa3());
+    }
+
+    static boolean validateEmergencyReportsResponse(EmergencyReportsInfoDTO request) {
+        return (request.getLatitude() != null &&
+                request.getLongitude() != null) &&
+                validate3WaString(request.getWa3());
     }
 }
