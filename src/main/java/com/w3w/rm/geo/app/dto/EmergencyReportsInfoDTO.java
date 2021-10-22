@@ -9,7 +9,7 @@ public class EmergencyReportsInfoDTO {
 
     @JsonProperty("lat")
     private Double latitude;
-    @JsonProperty("lon")
+    @JsonProperty("lng")
     private Double longitude;
 
     @JsonProperty("3wa")
