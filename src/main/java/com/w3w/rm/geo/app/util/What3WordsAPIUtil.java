@@ -5,6 +5,8 @@ import com.what3words.javawrapper.request.AutosuggestInputType;
 import com.what3words.javawrapper.request.Coordinates;
 import com.what3words.javawrapper.response.Autosuggest;
 
+import java.util.Optional;
+
 public interface What3WordsAPIUtil {
     static Autosuggest getAutoSuggestForLanguage(What3WordsV3 api, String input, String language) {
         return api
@@ -14,13 +16,15 @@ public interface What3WordsAPIUtil {
                 .execute();
     }
 
-
-    static Coordinates getCoordinatesForWords(What3WordsV3 api, String words) {
+    static Optional<Coordinates> getCoordinatesForWords(What3WordsV3 api, String words) {
         com.what3words.javawrapper.response.Coordinates
                 coordinates = api.convertToCoordinates(words)
                 .execute()
                 .getCoordinates();
-        return new Coordinates(coordinates.getLat(), coordinates.getLng());
+        if(coordinates == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new Coordinates(coordinates.getLat(), coordinates.getLng()));
     }
 
     static String getWordsInLangForCoordinates(What3WordsV3 api, Coordinates coordinates, String language) {

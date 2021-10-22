@@ -15,6 +15,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.Optional;
+
 @RunWith(MockitoJUnitRunner.class)
 public class What3WordsAPIUtilTest {
 
@@ -33,10 +35,10 @@ public class What3WordsAPIUtilTest {
         What3WordsV3 api = Mockito.mock(What3WordsV3.class);
         Mockito.when(api.convertToCoordinates(input)).thenReturn(mockBuilder);
 
-        Coordinates actual = What3WordsAPIUtil.getCoordinatesForWords(api, input);
-        Assert.assertNotNull(actual);
-        Assert.assertEquals(expected.getLat(), actual.getLat(), 0.00d);
-        Assert.assertEquals(expected.getLng(), actual.getLng(), 0.00d);
+        Optional<Coordinates> actual = What3WordsAPIUtil.getCoordinatesForWords(api, input);
+        Assert.assertTrue(actual.isPresent());
+        Assert.assertEquals(expected.getLat(), actual.get().getLat(), 0.00d);
+        Assert.assertEquals(expected.getLng(), actual.get().getLng(), 0.00d);
     }
 
     @Test
