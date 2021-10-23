@@ -42,6 +42,24 @@ public class What3WordsAPIUtilTest {
     }
 
     @Test
+    public void testGetAutoSuggestForGivenLanguage_Scenario2_NoResults() {
+        String input = "some.words.here";
+        com.what3words.javawrapper.request.ConvertToCoordinatesRequest.Builder mockBuilder = Mockito.mock(com.what3words.javawrapper.request.ConvertToCoordinatesRequest.Builder.class);
+
+
+        ConvertToCoordinates mockConvertToCoords = Mockito.mock(ConvertToCoordinates.class);
+        Mockito.when(mockConvertToCoords.getCoordinates()).thenReturn(null);
+
+        Mockito.when(mockBuilder.execute()).thenReturn(mockConvertToCoords);
+
+        What3WordsV3 api = Mockito.mock(What3WordsV3.class);
+        Mockito.when(api.convertToCoordinates(input)).thenReturn(mockBuilder);
+
+        Optional<Coordinates> actual = What3WordsAPIUtil.getCoordinatesForWords(api, input);
+        Assert.assertFalse(actual.isPresent());
+    }
+
+    @Test
     public void testAutoSuggestWordsLanguage_WithCountry() {
         String input = "some.words.here";
         String language = "lang";
