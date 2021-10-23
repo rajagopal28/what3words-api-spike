@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 public interface ApplicationUtil {
     String WA3_PATTERN_REGEX = "^/*[^0-9`~!@#$%^&*()+\\-_=\\]\\[{\\}\\\\|'<,.>?/\";:£§º©®\\s]{1,}[.｡。･・︒។։။۔።।][^0-9`~!@#$%^&*()+\\-_=\\]\\[{\\}\\\\|'<,.>?/\";:£§º©®\\s]{1,}[.｡。･・︒។։။۔።।][^0-9`~!@#$%^&*()+\\-_=\\]\\[{\\}\\\\|'<,.>?/\";:£§º©®\\s]{1,}$";
     String LANGUAGE_ENGLISH_UK = "en";
+    String COUNTRY_UK_GB = "GB";
     String LANGUAGE_WELSH_WALES = "cy";
     static boolean validate3WaString(String input) {
         if(StringUtils.isNotBlank(input)) {

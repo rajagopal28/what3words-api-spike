@@ -42,7 +42,29 @@ public class What3WordsAPIUtilTest {
     }
 
     @Test
-    public void testAutoSuggestWordsLanguage() {
+    public void testAutoSuggestWordsLanguage_WithCountry() {
+        String input = "some.words.here";
+        String language = "lang";
+        String country = "country1";
+        AutosuggestRequest.Builder mockBuilder = Mockito.mock(AutosuggestRequest.Builder.class);
+
+        Autosuggest expected = Mockito.mock(Autosuggest.class);
+
+        Mockito.when(mockBuilder.inputType(Mockito.any(AutosuggestInputType.class))).thenReturn(mockBuilder);
+        Mockito.when(mockBuilder.language(Mockito.eq(language))).thenReturn(mockBuilder);
+        Mockito.when(mockBuilder.execute()).thenReturn(expected);
+        Mockito.when(mockBuilder.clipToCountry(Mockito.eq(country))).thenReturn(mockBuilder);
+
+        What3WordsV3 api = Mockito.mock(What3WordsV3.class);
+        Mockito.when(api.autosuggest(input)).thenReturn(mockBuilder);
+
+        Autosuggest actual = What3WordsAPIUtil.getAutoSuggestForLanguageInCountry(api, input, language, country);
+        Assert.assertNotNull(actual);
+        Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testAutoSuggestWordsLanguage_WithoutCountry() {
         String input = "some.words.here";
         String language = "lang";
         AutosuggestRequest.Builder mockBuilder = Mockito.mock(AutosuggestRequest.Builder.class);
