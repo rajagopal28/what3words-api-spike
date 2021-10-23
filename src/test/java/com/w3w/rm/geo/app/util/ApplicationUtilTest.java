@@ -100,8 +100,14 @@ public class ApplicationUtilTest {
     }
 
     @Test
-    public void testErrorFunctionApply() {
+    public void testErrorFunctionApply_NotRecognized() {
         String actual = ApplicationUtil.NOT_RECOGNIZED_3WA_ERROR_FN.apply("some.word.here");
         Assert.assertEquals("3wa not recognised: some.word.here", actual);
+    }
+
+    @Test
+    public void testErrorFunctionApply_CantFetchAutoSuggest() {
+        String actual = ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply("some.word.here", "language");
+        Assert.assertEquals("Unable to fetch AutoSuggest for word:some.word.herein Language:language", actual);
     }
 }
