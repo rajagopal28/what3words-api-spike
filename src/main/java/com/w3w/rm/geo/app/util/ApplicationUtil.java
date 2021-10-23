@@ -19,6 +19,8 @@ public interface ApplicationUtil {
     String ERROR_NO_SUGGESTION_AVAILABLE = "No Suggestion found for given word!";
     String ERROR_MISSING_INFO_TO_CONVERT_P1 = "Unable to fetch AutoSuggest for word:";
     String ERROR_MISSING_INFO_TO_CONVERT_P2 = "in Language:";
+    String ERROR_INVALID_REQUEST = "Invalid Request!";
+    String ERROR_INVALID_3WA_WORDS = "Invalid 3wa word: ";
     static boolean validate3WaString(String input) {
         if(StringUtils.isNotBlank(input)) {
             Pattern pattern = Pattern.compile(WA3_PATTERN_REGEX);
@@ -41,5 +43,6 @@ public interface ApplicationUtil {
     }
 
     Function<String, String> NOT_RECOGNIZED_3WA_ERROR_FN = (s) -> ERROR_NOT_RECOGNISED_3WA  + s;
+    Function<String, String> INVALID_3WA_WORD_ERROR_FN = (s) -> ERROR_INVALID_3WA_WORDS  + s;
     BiFunction<String, String, String> UNABLE_TO_FETCH_AUTO_SUGGEST_FOR = (first, second) -> ERROR_MISSING_INFO_TO_CONVERT_P1  + first + ERROR_MISSING_INFO_TO_CONVERT_P2 + second;
 }

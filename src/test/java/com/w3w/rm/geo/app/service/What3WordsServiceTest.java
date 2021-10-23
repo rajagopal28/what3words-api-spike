@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +90,8 @@ public class What3WordsServiceTest {
         What3WordsV3 mockApi = Mockito.mock(What3WordsV3.class);
 
         getMockedConvertToCoordsStubs(wa3, null, mockApi);
-        List<Suggestion> suggestions = getMockAutoSuggestForLangAndString(null, wa3, wa3, ApplicationUtil.LANGUAGE_ENGLISH_UK, ApplicationUtil.COUNTRY_UK_GB, mockApi);
+        List<Suggestion> suggestions = getMockAutoSuggestForLangAndString(null, wa3, ApplicationUtil.LANGUAGE_ENGLISH_UK, ApplicationUtil.COUNTRY_UK_GB, mockApi, getAutoSuggestMockWithSuggestions(Collections.singletonList(wa3+"-"+ApplicationUtil.COUNTRY_UK_GB)));
+
         Mockito.when(what3WordsWrapper.getInstance()).thenReturn(mockApi);
 
         Map.Entry<EmergencyReportsInfoDTO, EmergencyReportsSuggestionDTO> actual = service.checkAndFillMissing3WaInfoForCoordinates(dto);
@@ -180,7 +182,7 @@ public class What3WordsServiceTest {
         What3WordsV3 mockApi = Mockito.mock(What3WordsV3.class);
         Mockito.when(what3WordsWrapper.getInstance()).thenReturn(mockApi);
 
-        getMockAutoSuggestForLangAndString(null, source3Wa, source3Wa, sourceLang, "", mockApi);
+        getMockAutoSuggestForLangAndString(null, source3Wa, sourceLang, "", mockApi, getAutoSuggestMockWithSuggestions(Collections.singletonList(source3Wa+"-")));
 
         getMockedConvertTo3WaStubs(targetLang, mockApi, target3Wa);
         getConvertTo3waMockObjectWithTargetLang(source3Wa,12.341, 94.212, mockApi);
@@ -204,9 +206,9 @@ public class What3WordsServiceTest {
         What3WordsV3 mockApi = Mockito.mock(What3WordsV3.class);
         Mockito.when(what3WordsWrapper.getInstance()).thenReturn(mockApi);
         AutosuggestRequest.Builder mockBuilder = Mockito.mock(AutosuggestRequest.Builder.class);
-        getMockAutoSuggestForLangAndString(mockBuilder, source3Wa, target3Wa, second, "", mockApi);
+        getMockAutoSuggestForLangAndString(mockBuilder, source3Wa, second, "", mockApi, getAutoSuggestMockWithSuggestions(Collections.singletonList(target3Wa+"-")));
 
-        getMockAutoSuggestForLangAndString(mockBuilder, source3Wa, source3Wa, first, "", mockApi);
+        getMockAutoSuggestForLangAndString(mockBuilder, source3Wa, first, "", mockApi, getAutoSuggestMockWithSuggestions(Collections.singletonList(source3Wa+"-")));
 
         getMockedConvertTo3WaStubs(second, mockApi, target3Wa);
         getConvertTo3waMockObjectWithTargetLang(source3Wa,12.341, 94.212, mockApi);
@@ -216,6 +218,106 @@ public class What3WordsServiceTest {
         Mockito.verify(mockApi).convertToCoordinates(source3Wa);
         Mockito.verify(mockApi).convertTo3wa(Mockito.any(Coordinates.class));
         Mockito.verify(mockApi, Mockito.times(2)).autosuggest(Mockito.eq(source3Wa));
+    }
+
+
+    @Test
+    public void testCheckAndConvert3WaBetween2GivenLanguages_ErrorScenario1_Invalid3WaInput() {
+        String input = "so12me.valid43_word";
+        String first = ApplicationUtil.LANGUAGE_ENGLISH_UK;
+        String second = ApplicationUtil.LANGUAGE_WELSH_WALES;
+
+        try{
+            service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
+            Assert.fail("Should not come here!");
+        } catch (Exception ex) {
+            // Assert.assertTrue(ex instanceof RuntimeException);
+            Assert.assertEquals(ApplicationUtil.INVALID_3WA_WORD_ERROR_FN.apply(input), ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testCheckAndConvert3WaBetween2GivenLanguages_ErrorScenario2_FirstAutoSuggestCallFails() {
+        String input = "some.valid.word";
+        String first = ApplicationUtil.LANGUAGE_ENGLISH_UK;
+        String second = ApplicationUtil.LANGUAGE_WELSH_WALES;
+        What3WordsV3 mockApi = Mockito.mock(What3WordsV3.class);
+        Mockito.when(what3WordsWrapper.getInstance()).thenReturn(mockApi);
+
+        getMockAutoSuggestForLangAndString(null, input, first, "", mockApi, null);
+        try{
+            service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
+            Assert.fail("Should not come here!");
+        } catch (Exception ex) {
+            // Assert.assertTrue(ex instanceof RuntimeException);
+            Mockito.verify(mockApi).autosuggest(input);
+            Assert.assertEquals(ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply(input, first), ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testCheckAndConvert3WaBetween2GivenLanguages_ErrorScenario2_EmptySuggestionsIn2ndCall() {
+        String input = "some.valid.word";
+        String first = ApplicationUtil.LANGUAGE_ENGLISH_UK;
+        String second = ApplicationUtil.LANGUAGE_WELSH_WALES;
+        What3WordsV3 mockApi = Mockito.mock(What3WordsV3.class);
+        Mockito.when(what3WordsWrapper.getInstance()).thenReturn(mockApi);
+
+        AutosuggestRequest.Builder mockBuilder = Mockito.mock(AutosuggestRequest.Builder.class);
+        getMockAutoSuggestForLangAndString(mockBuilder, input, first, "", mockApi, getAutoSuggestMockWithSuggestions(Collections.emptyList()));
+        getMockAutoSuggestForLangAndString(mockBuilder, input, second, "", mockApi, getAutoSuggestMockWithSuggestions(Collections.emptyList()));
+        try{
+            service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
+            Assert.fail("Should not come here!");
+        } catch (Exception ex) {
+            // Assert.assertTrue(ex instanceof RuntimeException);
+            Mockito.verify(mockApi, Mockito.times(2)).autosuggest(input);
+            Assert.assertEquals(ApplicationUtil.ERROR_NO_SUGGESTION_AVAILABLE, ex.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testCheckAndConvert3WaBetween2GivenLanguages_ErrorScenario2_EmptyCoordinatesDueToFetchIssue() {
+        String input = "some.valid.word";
+        String first = ApplicationUtil.LANGUAGE_ENGLISH_UK;
+        String second = ApplicationUtil.LANGUAGE_WELSH_WALES;
+        What3WordsV3 mockApi = Mockito.mock(What3WordsV3.class);
+        Mockito.when(what3WordsWrapper.getInstance()).thenReturn(mockApi);
+
+        AutosuggestRequest.Builder mockBuilder = Mockito.mock(AutosuggestRequest.Builder.class);
+        getMockAutoSuggestForLangAndString(mockBuilder, input, first, "", mockApi, getAutoSuggestMockWithSuggestions(Collections.singletonList(input)));
+        getConvertTo3waMockObjectWithTargetLangForCoords(input, null, mockApi);
+        try{
+            service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
+            Assert.fail("Should not come here!");
+        } catch (Exception ex) {
+            // Assert.assertTrue(ex instanceof RuntimeException);
+            Mockito.verify(mockApi).autosuggest(input);
+            Assert.assertEquals(ApplicationUtil.ERROR_MISSING_INFO_TO_CONVERT, ex.getMessage());
+        }
+    }
+
+    @Test
+    public void testCheckAndConvert3WaBetween2GivenLanguages_ErrorScenario2_SecondAutoSuggestFetchNull() {
+        String input = "some.valid.word";
+        String first = ApplicationUtil.LANGUAGE_ENGLISH_UK;
+        String second = ApplicationUtil.LANGUAGE_WELSH_WALES;
+        What3WordsV3 mockApi = Mockito.mock(What3WordsV3.class);
+        Mockito.when(what3WordsWrapper.getInstance()).thenReturn(mockApi);
+
+        AutosuggestRequest.Builder mockBuilder = Mockito.mock(AutosuggestRequest.Builder.class);
+        getMockAutoSuggestForLangAndString(mockBuilder, input, first, "", mockApi, getAutoSuggestMockWithSuggestions(Collections.emptyList()));
+        getMockAutoSuggestForLangAndString(mockBuilder, input, second, "", mockApi, null);
+        getConvertTo3waMockObjectWithTargetLangForCoords(input, null, mockApi);
+        try{
+            service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
+            Assert.fail("Should not come here!");
+        } catch (Exception ex) {
+            // Assert.assertTrue(ex instanceof RuntimeException);
+            Mockito.verify(mockApi, Mockito.times(2)).autosuggest(input);
+            Assert.assertEquals(ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply(input, second), ex.getMessage());
+        }
     }
 
     private void getMockedConvertToCoordsStubs(String wa3, com.what3words.javawrapper.response.Coordinates coordinates, What3WordsV3 mockApi) {
@@ -229,14 +331,18 @@ public class What3WordsServiceTest {
     }
 
     private void getConvertTo3waMockObjectWithTargetLang(String source3Wa, double expectedLat, double expectedLong, What3WordsV3 mockApi) {
-        ConvertToCoordinatesRequest.Builder mockBuilder2 = Mockito.mock(ConvertToCoordinatesRequest.Builder.class);
-        ConvertToCoordinates mockConvCoords = Mockito.mock(ConvertToCoordinates.class);
         com.what3words.javawrapper.response.Coordinates mockCoords = Mockito.mock(com.what3words.javawrapper.response.Coordinates.class);
 
         Mockito.when(mockCoords.getLat()).thenReturn(expectedLat);
         Mockito.when(mockCoords.getLng()).thenReturn(expectedLong);
+        getConvertTo3waMockObjectWithTargetLangForCoords(source3Wa, mockCoords, mockApi);
+    }
 
-        Mockito.when(mockConvCoords.getCoordinates()).thenReturn(mockCoords);
+    private void getConvertTo3waMockObjectWithTargetLangForCoords(String source3Wa, com.what3words.javawrapper.response.Coordinates coords, What3WordsV3 mockApi) {
+        ConvertToCoordinatesRequest.Builder mockBuilder2 = Mockito.mock(ConvertToCoordinatesRequest.Builder.class);
+        ConvertToCoordinates mockConvCoords = Mockito.mock(ConvertToCoordinates.class);
+
+        Mockito.when(mockConvCoords.getCoordinates()).thenReturn(coords);
         Mockito.when(mockBuilder2.execute()).thenReturn(mockConvCoords);
 
         Mockito.when(mockApi.convertToCoordinates(Mockito.eq(source3Wa))).thenReturn(mockBuilder2);
@@ -253,7 +359,9 @@ public class What3WordsServiceTest {
         Mockito.when(mockApi.convertTo3wa(Mockito.any(Coordinates.class))).thenReturn(mockBuilder3);
     }
 
-    private List<Suggestion> getMockAutoSuggestForLangAndString(AutosuggestRequest.Builder mockBuilder, String source3Wa, String target3wa, String sourceLang, String country, What3WordsV3 mockApi) {
+    private List<Suggestion> getMockAutoSuggestForLangAndString(AutosuggestRequest.Builder mockBuilder, String source3Wa, String sourceLang,
+                                                                String country, What3WordsV3 mockApi,
+                                                                Autosuggest autosuggest) {
         AutosuggestRequest.Builder mockBuilder2 = Mockito.mock(AutosuggestRequest.Builder.class);
         if(mockBuilder == null) {
             mockBuilder = mockBuilder2;
@@ -261,21 +369,27 @@ public class What3WordsServiceTest {
         Mockito.when(mockBuilder.inputType(Mockito.eq(AutosuggestInputType.GENERIC_VOICE))).thenReturn(mockBuilder);
         Mockito.when(mockBuilder.clipToCountry(Mockito.eq(country))).thenReturn(mockBuilder);
         Mockito.when(mockBuilder.language(Mockito.eq(sourceLang))).thenReturn(mockBuilder2);
-
-        Autosuggest mockAutoSuggest = Mockito.mock(Autosuggest.class);
-
-        String nearPlace1 = "nearPlace1";
-        Suggestion suggestion1 = Mockito.mock(Suggestion.class);
-        Mockito.when(suggestion1.getCountry()).thenReturn(country);
-        Mockito.when(suggestion1.getNearestPlace()).thenReturn(nearPlace1);
-        Mockito.when(suggestion1.getWords()).thenReturn(target3wa); // suggestion matching the input
-
-        List<Suggestion> suggestionList = Collections.singletonList(suggestion1);
-        Mockito.when(mockAutoSuggest.getSuggestions()).thenReturn(suggestionList);
-        Mockito.when(mockBuilder2.execute()).thenReturn(mockAutoSuggest);
+        Mockito.when(mockBuilder2.execute()).thenReturn(autosuggest);
 
         Mockito.when(mockApi.autosuggest(Mockito.eq(source3Wa))).thenReturn(mockBuilder);
-        return suggestionList;
+
+        return autosuggest != null ? autosuggest.getSuggestions() : Collections.emptyList();
+    }
+
+    private Autosuggest getAutoSuggestMockWithSuggestions(List<String> inputStrings) {
+        Autosuggest mockAutoSuggest = Mockito.mock(Autosuggest.class);
+    List<Suggestion> suggestionList = new ArrayList<>();
+       int i=1;
+       for (String in : inputStrings) {
+           String nearPlace1 = "nearPlace"+i;
+           Suggestion suggestion = Mockito.mock(Suggestion.class);
+           Mockito.when(suggestion.getCountry()).thenReturn(in.split("-").length > 1 ? in.split("-")[1] : "");
+           Mockito.when(suggestion.getNearestPlace()).thenReturn(nearPlace1);
+           Mockito.when(suggestion.getWords()).thenReturn(in.split("-")[0]); // suggestion matching the input
+           suggestionList.add(suggestion);
+       }
+        Mockito.when(mockAutoSuggest.getSuggestions()).thenReturn(suggestionList);
+        return mockAutoSuggest;
     }
 
 }

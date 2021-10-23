@@ -70,7 +70,7 @@ public class What3WordsService {
                 throw new RuntimeException(ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply(input, secondLanguage));
             }
         } else {
-            throw new RuntimeException("Invalid 3wa word : " + input);
+            throw new RuntimeException(ApplicationUtil.INVALID_3WA_WORD_ERROR_FN.apply(input));
         }
     }
 
@@ -78,7 +78,7 @@ public class What3WordsService {
         EmergencyReportsSuggestionDTO emergencyReportsSuggestionDTO = new EmergencyReportsSuggestionDTO();
         if(!ApplicationUtil.validateEmergencyReportsRequest(infoDTO)) {
             // TODO: throw Custom exception
-            throw new RuntimeException("Invalid Request!");
+            throw new RuntimeException(ApplicationUtil.ERROR_INVALID_REQUEST);
         } else {
             What3WordsV3 api = what3WordsWrapper.getInstance();
             if(StringUtils.isBlank(infoDTO.getWa3())) {
