@@ -98,4 +98,10 @@ public class ApplicationUtilTest {
         dto5.setWa3("good.word.here");
         Assert.assertFalse(ApplicationUtil.validateEmergencyReportsResponse(dto5));
     }
+
+    @Test
+    public void testErrorFunctionApply() {
+        String actual = ApplicationUtil.NOT_RECOGNIZED_3WA_ERROR_FN.apply("some.word.here");
+        Assert.assertEquals("3wa not recognised: some.word.here", actual);
+    }
 }

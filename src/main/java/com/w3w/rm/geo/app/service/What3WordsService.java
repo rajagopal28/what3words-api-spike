@@ -43,9 +43,9 @@ public class What3WordsService {
                     infoDTO.setLatitude(coordinatesForWords.get().getLat());
                     infoDTO.setLongitude(coordinatesForWords.get().getLng());
                 } else {
-                    // ger suggestions
+                    // get suggestions
                     Autosuggest autoSuggestForLanguage = What3WordsAPIUtil.getAutoSuggestForLanguageInCountry(api, infoDTO.getWa3(), ApplicationUtil.LANGUAGE_ENGLISH_UK, ApplicationUtil.COUNTRY_UK_GB);
-                    emergencyReportsSuggestionDTO.setMessage("3wa not recognised: " + infoDTO.getWa3());
+                    emergencyReportsSuggestionDTO.setMessage(ApplicationUtil.NOT_RECOGNIZED_3WA_ERROR_FN.apply(infoDTO.getWa3()));
                     List<SuggestionDTO> suggestionsList = autoSuggestForLanguage.getSuggestions().stream().map(SuggestionDTO::from).collect(Collectors.toList());
                     emergencyReportsSuggestionDTO.setSuggestions(suggestionsList);
                 }

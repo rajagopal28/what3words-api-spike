@@ -153,7 +153,7 @@ public class What3WordsServiceTest {
         EmergencyReportsSuggestionDTO reportsSuggestionDTO = actual.getValue();
         Assert.assertNotNull(reportsSuggestionDTO);
         Assert.assertEquals(dto, respDto);
-        Assert.assertEquals("3wa not recognised: "+wa3, reportsSuggestionDTO.getMessage());
+        Assert.assertEquals(ApplicationUtil.NOT_RECOGNIZED_3WA_ERROR_FN.apply(wa3), reportsSuggestionDTO.getMessage());
         Assert.assertTrue(reportsSuggestionDTO.getSuggestions().stream().allMatch( s ->
             suggestions.stream().anyMatch(s2 -> s.getWords().equals(s2.getWords()) && s.getCountry().equals(s2.getCountry()) && s.getNearestPlace().equals(s2.getNearestPlace()))
         ));
