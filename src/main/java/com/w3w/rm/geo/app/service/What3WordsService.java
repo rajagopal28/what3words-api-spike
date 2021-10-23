@@ -4,6 +4,10 @@ import com.w3w.rm.geo.app.config.What3WordsWrapper;
 import com.w3w.rm.geo.app.dto.EmergencyReportsInfoDTO;
 import com.w3w.rm.geo.app.dto.EmergencyReportsSuggestionDTO;
 import com.w3w.rm.geo.app.dto.SuggestionDTO;
+import com.w3w.rm.geo.app.exception.Invalid3WaWordException;
+import com.w3w.rm.geo.app.exception.MissingRequiredDataException;
+import com.w3w.rm.geo.app.exception.NoSuggestionsAvailableException;
+import com.w3w.rm.geo.app.exception.UnableToRetrieveDataException;
 import com.w3w.rm.geo.app.util.ApplicationUtil;
 import com.w3w.rm.geo.app.util.What3WordsAPIUtil;
 import com.what3words.javawrapper.What3WordsV3;
@@ -46,12 +50,12 @@ public class What3WordsService {
                     toLang = firstLanguage; // the target language is 1st one as the 3wa is in 2nd lang
                 }
             } else {
-                throw new RuntimeException(ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply(input, firstLanguage));
+                throw new UnableToRetrieveDataException(input, firstLanguage);
             }
             // whichever lang the word is not in that is the target language
             if (autosuggest != null) {
                 if(autosuggest.getSuggestions().isEmpty()) {
-                    throw new RuntimeException(ApplicationUtil.ERROR_NO_SUGGESTION_AVAILABLE);
+                    throw new NoSuggestionsAvailableException();
                 }
                 Suggestion suggestion = autosuggest.getSuggestions().get(0);
                 System.out.println("suggest ### 33 == " + autosuggest.getSuggestions().stream()
@@ -64,21 +68,20 @@ public class What3WordsService {
                             coordinatesForWords.get(),
                             toLang);
                 } else {
-                    throw new RuntimeException(ApplicationUtil.ERROR_MISSING_INFO_TO_CONVERT);
+                    throw new MissingRequiredDataException(ApplicationUtil.ERROR_MISSING_INFO_TO_CONVERT);
                 }
             } else {
-                throw new RuntimeException(ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply(input, secondLanguage));
+                throw new UnableToRetrieveDataException(input, secondLanguage);
             }
         } else {
-            throw new RuntimeException(ApplicationUtil.INVALID_3WA_WORD_ERROR_FN.apply(input));
+            throw new Invalid3WaWordException(input);
         }
     }
 
     public Map.Entry<EmergencyReportsInfoDTO, EmergencyReportsSuggestionDTO> checkAndFillMissing3WaInfoForCoordinates(EmergencyReportsInfoDTO infoDTO) {
         EmergencyReportsSuggestionDTO emergencyReportsSuggestionDTO = new EmergencyReportsSuggestionDTO();
         if(!ApplicationUtil.validateEmergencyReportsRequest(infoDTO)) {
-            // TODO: throw Custom exception
-            throw new RuntimeException(ApplicationUtil.ERROR_INVALID_REQUEST);
+            throw new MissingRequiredDataException();
         } else {
             What3WordsV3 api = what3WordsWrapper.getInstance();
             if(StringUtils.isBlank(infoDTO.getWa3())) {

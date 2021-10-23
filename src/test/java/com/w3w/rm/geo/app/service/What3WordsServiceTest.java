@@ -3,6 +3,10 @@ package com.w3w.rm.geo.app.service;
 import com.w3w.rm.geo.app.config.What3WordsWrapper;
 import com.w3w.rm.geo.app.dto.EmergencyReportsInfoDTO;
 import com.w3w.rm.geo.app.dto.EmergencyReportsSuggestionDTO;
+import com.w3w.rm.geo.app.exception.Invalid3WaWordException;
+import com.w3w.rm.geo.app.exception.MissingRequiredDataException;
+import com.w3w.rm.geo.app.exception.NoSuggestionsAvailableException;
+import com.w3w.rm.geo.app.exception.UnableToRetrieveDataException;
 import com.w3w.rm.geo.app.util.ApplicationUtil;
 import com.what3words.javawrapper.What3WordsV3;
 import com.what3words.javawrapper.request.*;
@@ -137,7 +141,8 @@ public class What3WordsServiceTest {
             service.checkAndFillMissing3WaInfoForCoordinates(dto);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            Assert.assertEquals("Invalid Request!", ex.getMessage());
+            Assert.assertTrue(ex instanceof MissingRequiredDataException);
+            Assert.assertEquals(ApplicationUtil.ERROR_INVALID_REQUEST, ex.getMessage());
         }
     }
 
@@ -152,7 +157,8 @@ public class What3WordsServiceTest {
             service.checkAndFillMissing3WaInfoForCoordinates(dto);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            Assert.assertEquals("Invalid Request!", ex.getMessage());
+            Assert.assertTrue(ex instanceof MissingRequiredDataException);
+            Assert.assertEquals(ApplicationUtil.ERROR_INVALID_REQUEST, ex.getMessage());
         }
 
     }
@@ -167,7 +173,8 @@ public class What3WordsServiceTest {
             service.checkAndFillMissing3WaInfoForCoordinates(dto);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            Assert.assertEquals("Invalid Request!", ex.getMessage());
+            Assert.assertTrue(ex instanceof MissingRequiredDataException);
+            Assert.assertEquals(ApplicationUtil.ERROR_INVALID_REQUEST, ex.getMessage());
         }
 
     }
@@ -226,12 +233,11 @@ public class What3WordsServiceTest {
         String input = "so12me.valid43_word";
         String first = ApplicationUtil.LANGUAGE_ENGLISH_UK;
         String second = ApplicationUtil.LANGUAGE_WELSH_WALES;
-
         try{
             service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            // Assert.assertTrue(ex instanceof RuntimeException);
+            Assert.assertTrue(ex instanceof Invalid3WaWordException);
             Assert.assertEquals(ApplicationUtil.INVALID_3WA_WORD_ERROR_FN.apply(input), ex.getMessage());
         }
     }
@@ -249,7 +255,7 @@ public class What3WordsServiceTest {
             service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            // Assert.assertTrue(ex instanceof RuntimeException);
+            Assert.assertTrue(ex instanceof UnableToRetrieveDataException);
             Mockito.verify(mockApi).autosuggest(input);
             Assert.assertEquals(ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply(input, first), ex.getMessage());
         }
@@ -270,7 +276,7 @@ public class What3WordsServiceTest {
             service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            // Assert.assertTrue(ex instanceof RuntimeException);
+            Assert.assertTrue(ex instanceof NoSuggestionsAvailableException);
             Mockito.verify(mockApi, Mockito.times(2)).autosuggest(input);
             Assert.assertEquals(ApplicationUtil.ERROR_NO_SUGGESTION_AVAILABLE, ex.getMessage());
         }
@@ -292,7 +298,7 @@ public class What3WordsServiceTest {
             service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            // Assert.assertTrue(ex instanceof RuntimeException);
+            Assert.assertTrue(ex instanceof MissingRequiredDataException);
             Mockito.verify(mockApi).autosuggest(input);
             Assert.assertEquals(ApplicationUtil.ERROR_MISSING_INFO_TO_CONVERT, ex.getMessage());
         }
@@ -314,7 +320,7 @@ public class What3WordsServiceTest {
             service.checkAndConvert3WaBetween2GivenLanguages(input, first, second);
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
-            // Assert.assertTrue(ex instanceof RuntimeException);
+            Assert.assertTrue(ex instanceof UnableToRetrieveDataException);
             Mockito.verify(mockApi, Mockito.times(2)).autosuggest(input);
             Assert.assertEquals(ApplicationUtil.UNABLE_TO_FETCH_AUTO_SUGGEST_FOR.apply(input, second), ex.getMessage());
         }
