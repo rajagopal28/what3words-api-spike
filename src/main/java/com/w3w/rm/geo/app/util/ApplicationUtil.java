@@ -14,6 +14,9 @@ public interface ApplicationUtil {
     String COUNTRY_UK_GB = "GB";
     String LANGUAGE_WELSH_WALES = "cy";
 
+    String ENDPOINT_WELSH_CONVERT_PATH = "/emergency-api/welsh-convert";
+    String ENDPOINT_EMERGENCY_REPORT_PATH = "/emergency-api/reports";
+
     String ERROR_NOT_RECOGNISED_3WA = "3wa not recognised: ";
     String ERROR_MISSING_INFO_TO_CONVERT = "Missing info to fetch suggestion!";
     String ERROR_NO_SUGGESTION_AVAILABLE = "No Suggestion found for given word!";

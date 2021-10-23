@@ -14,6 +14,7 @@ import com.what3words.javawrapper.What3WordsV3;
 import com.what3words.javawrapper.request.Coordinates;
 import com.what3words.javawrapper.response.Autosuggest;
 import com.what3words.javawrapper.response.Suggestion;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class What3WordsService {
 
     @Autowired
@@ -41,11 +43,11 @@ public class What3WordsService {
                             .stream()
                             .map(Suggestion::getWords)
                             .noneMatch(input::equals)) {
-                    System.out.println("suggest 11 == " + autosuggest.getSuggestions().stream()
+                    log.info("suggest 11 == " + autosuggest.getSuggestions().stream()
                         .map(s -> s.getWords() + "-" + s.getCountry() + "-" + s.getLanguage() + "-" + s.getNearestPlace())
                         .collect(Collectors.joining(" , ")));
                     // then the chosen language is wrong --> Fetch in the second language
-                    System.out.println("Inside if Welsh!!");
+                    log.info("Inside if Welsh!!");
                     autosuggest = What3WordsAPIUtil.getAutoSuggestForLanguage(api, input, secondLanguage);
                     toLang = firstLanguage; // the target language is 1st one as the 3wa is in 2nd lang
                 }
@@ -58,7 +60,7 @@ public class What3WordsService {
                     throw new NoSuggestionsAvailableException();
                 }
                 Suggestion suggestion = autosuggest.getSuggestions().get(0);
-                System.out.println("suggest ### 33 == " + autosuggest.getSuggestions().stream()
+                log.info("suggest ### 33 == " + autosuggest.getSuggestions().stream()
                         .map(s -> s.getWords() + "-" + s.getCountry() + "-" + s.getLanguage() + "-" + s.getNearestPlace())
                         .collect(Collectors.joining(",")));
 
