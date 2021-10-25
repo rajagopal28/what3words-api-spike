@@ -238,7 +238,7 @@ public class What3WordsServiceTest {
             Assert.fail("Should not come here!");
         } catch (Exception ex) {
             Assert.assertTrue(ex instanceof Invalid3WaWordException);
-            Assert.assertEquals(ApplicationUtil.INVALID_3WA_WORD_ERROR_FN.apply(input), ex.getMessage());
+            Assert.assertEquals(ApplicationUtil.NOT_RECOGNIZED_3WA_ERROR_FN.apply(input), ex.getMessage());
         }
     }
 

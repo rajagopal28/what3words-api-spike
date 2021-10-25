@@ -63,7 +63,7 @@ public class GeoLocationControllerTest {
 
 
     @Test
-    public void testEmergencyResponseHappyFlow_Scenario1_NotFoundMatchingInfo_FetchSuggestions() {
+    public void testEmergencyResponseHappyFlow_Scenario2_NotFoundMatchingInfo_FetchSuggestions() {
         EmergencyReportsInfoDTO infoDTO = new EmergencyReportsInfoDTO();
         EmergencyReportsSuggestionDTO suggestionDTO = new EmergencyReportsSuggestionDTO();
         Map<EmergencyReportsInfoDTO, EmergencyReportsSuggestionDTO> map = Map.of(infoDTO, suggestionDTO);

@@ -1,5 +1,6 @@
 package com.w3w.rm.geo.app.controller.advice;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.w3w.rm.geo.app.exception.Invalid3WaWordException;
 import com.w3w.rm.geo.app.exception.MissingRequiredDataException;
 import com.w3w.rm.geo.app.exception.NoSuggestionsAvailableException;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -26,6 +28,7 @@ import javax.validation.constraints.NotNull;
  */
 @Slf4j
 @RestControllerAdvice
+@ControllerAdvice
 public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
 
     /**
@@ -44,7 +47,7 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
      *
      * @return ResponseEntity with UNPROCESSABLE_ENTITY status code to indicate the data passed is invalid
      */
-    @ExceptionHandler(Invalid3WaWordException.class)
+    @ExceptionHandler(MissingRequiredDataException.class)
     public ResponseEntity<ServiceError> handleInvalid3MissingRequiredData(MissingRequiredDataException exception) {
         log.error("Invalid input passed or essential information missing!", exception);
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ServiceError.from(exception));
@@ -55,7 +58,7 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
      *
      * @return ResponseEntity with NO_CONTENT status code to indicate the no 3wa suggestions found for given string
      */
-    @ExceptionHandler(Invalid3WaWordException.class)
+    @ExceptionHandler(NoSuggestionsAvailableException.class)
     public ResponseEntity<ServiceError> handleNoSuggestionFoundOnFetching(NoSuggestionsAvailableException exception) {
         log.error("Failed to fetch suggestions or no suggestion available for given 3wa!", exception);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ServiceError.from(exception));
@@ -66,7 +69,7 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
      *
      * @return ResponseEntity with SERVICE_UNAVAILABLE status code to indicate the 3wa API call is failing
      */
-    @ExceptionHandler(Invalid3WaWordException.class)
+    @ExceptionHandler(UnableToRetrieveDataException.class)
     public ResponseEntity<ServiceError> handleUnableToRetrieveDataException(UnableToRetrieveDataException exception) {
         log.error("Failed to invoke API as it throws NullPointerException!", exception);
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ServiceError.from(exception));
@@ -91,13 +94,14 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ServiceError> handleUnexpected(Exception exception) {
         log.error("Unexpected exception", exception);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ServiceError(exception.getMessage(), null));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ServiceError(exception.getMessage(), exception));
     }
 
     @Data
     public static class ServiceError {
         @NotNull
-        private final String errorMessage;
+        private final String message;
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         private final Object details;
 
         public static ServiceError from(RuntimeException paymentException) {
