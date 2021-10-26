@@ -8,6 +8,11 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * ApplicationUtil contains all constants and validations related to the application data.
+ *
+ * @author Rajagopal
+ */
 public interface ApplicationUtil {
     String WA3_PATTERN_REGEX = "^/*[^0-9`~!@#$%^&*()+\\-_=\\]\\[{\\}\\\\|'<,.>?/\";:£§º©®\\s]{1,}[.｡。･・︒។։။۔።।][^0-9`~!@#$%^&*()+\\-_=\\]\\[{\\}\\\\|'<,.>?/\";:£§º©®\\s]{1,}[.｡。･・︒។։။۔።।][^0-9`~!@#$%^&*()+\\-_=\\]\\[{\\}\\\\|'<,.>?/\";:£§º©®\\s]{1,}$";
     String LANGUAGE_ENGLISH_UK = "en";
@@ -23,6 +28,13 @@ public interface ApplicationUtil {
     String ERROR_MISSING_INFO_TO_CONVERT_P1 = "Unable to fetch AutoSuggest for word:";
     String ERROR_MISSING_INFO_TO_CONVERT_P2 = "in Language:";
     String ERROR_INVALID_REQUEST = "Invalid Request!";
+
+    /*
+    * The validate3WaString method validated the given string against 3wa pattern.
+    *
+    * @param input string to be validated.
+    * @return boolean indicating whether the given string is a valid 3wa String.
+    * */
     static boolean validate3WaString(String input) {
         if(StringUtils.isNotBlank(input)) {
             Pattern pattern = Pattern.compile(WA3_PATTERN_REGEX);
@@ -32,12 +44,24 @@ public interface ApplicationUtil {
         return false;
     }
 
+    /*
+     * The validateEmergencyReportsRequest method validated the given EmergencyReportsInfoDTO to have blank 3wa or empty CoOrdinates..
+     *
+     * @param EmergencyReportsInfoDTO instance to be validated.
+     * @return boolean indicating whether the given EmergencyReportsInfoDTO is a valid Request to be processed.
+     * */
     static boolean validateEmergencyReportsRequest(EmergencyReportsInfoDTO request) {
         return (request.getLatitude() != null &&
                 request.getLongitude() != null) ||
                 validate3WaString(request.getWa3());
     }
 
+    /*
+     * The validateEmergencyReportsResponse method validated the given EmergencyReportsInfoDTO has fully formed data.
+     *
+     * @param input EmergencyReportsInfoDTO to be validated.
+     * @return boolean indicating whether the given EmergencyReportsInfoDTO has all fields not empty.
+     * */
     static boolean validateEmergencyReportsResponse(EmergencyReportsInfoDTO request) {
         return (request.getLatitude() != null &&
                 request.getLongitude() != null) &&
