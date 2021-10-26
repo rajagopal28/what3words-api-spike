@@ -225,6 +225,8 @@ $ mvn  test
 >         Developed in Jetbrain's IntelliJ IDE
 
 ## References
+ - what3words java wrapper : https://developer.what3words.com/tutorial/java
+  - API details: https://developer.what3words.com/public-api/docs#overview
  - mocktio failing for API class: https://stackoverflow.com/a/58200905
  - json name setting: https://stackoverflow.com/q/40969156
  - `handlerExceptionResolver` not found bean issue : https://stackoverflow.com/a/56121977
