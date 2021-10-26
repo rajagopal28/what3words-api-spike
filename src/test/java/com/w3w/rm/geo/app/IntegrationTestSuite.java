@@ -37,12 +37,11 @@ public class IntegrationTestSuite {
     @Test
     public void testWelshConvertFromWelshToEnglish() {
         try {
-            ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_WELSH_CONVERT_PATH).
+            mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_WELSH_CONVERT_PATH).
                     content("{\"3wa\": \"daring.lion.race\"}")
                     .contentType(What3WordsV3.CONTENT_TYPE_JSON))
-                    .andExpect(MockMvcResultMatchers.status().isOk());
-            String responseString = resultActions.andReturn().getResponse().getContentAsString();
-            Assert.assertEquals("{\"3wa\":\"sychach.parciau.lwmpyn\"}", responseString);
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().json("{\"3wa\":\"sychach.parciau.lwmpyn\"}"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -51,12 +50,11 @@ public class IntegrationTestSuite {
     @Test
     public void testWelshConvertFromEnglishToWelsh() {
         try {
-            ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_WELSH_CONVERT_PATH).
+            mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_WELSH_CONVERT_PATH).
                     content("{\"3wa\":\"sychach.parciau.lwmpyn\"}")
                     .contentType(What3WordsV3.CONTENT_TYPE_JSON))
-                    .andExpect(MockMvcResultMatchers.status().isOk());
-            String responseString = resultActions.andReturn().getResponse().getContentAsString();
-            Assert.assertEquals("{\"3wa\":\"daring.lion.race\"}", responseString);
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().json("{\"3wa\":\"daring.lion.race\"}"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,12 +65,11 @@ public class IntegrationTestSuite {
     @Test
     public void testWelshConvert_Wrong3wa() {
         try {
-            ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_WELSH_CONVERT_PATH).
+            mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_WELSH_CONVERT_PATH).
                     content("{\"3wa\":\"23sadas_3243.lwmpyn\"}")
                     .contentType(What3WordsV3.CONTENT_TYPE_JSON))
-                    .andExpect(MockMvcResultMatchers.status().isBadRequest());
-            String responseString = resultActions.andReturn().getResponse().getContentAsString();
-            Assert.assertEquals("{\"message\":\"3wa not recognised: 23sadas_3243.lwmpyn\"}", responseString);
+                    .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                    .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"3wa not recognised: 23sadas_3243.lwmpyn\"}"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -82,7 +79,7 @@ public class IntegrationTestSuite {
     @Test
     public void testEmergencyReport_Get3WaFilledForLatLong() {
         try {
-            ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_EMERGENCY_REPORT_PATH).
+            mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_EMERGENCY_REPORT_PATH).
                     content("{" +
                             "\"message\":\"A hiker has got lost\"," +
                             "\"lat\": 51.508341," +
@@ -90,14 +87,12 @@ public class IntegrationTestSuite {
                             "\"3wa\": null," +
                             "\"reportingOfficerName\": \"Joe Bloggs\"" +
                             "}")
-                    .contentType(What3WordsV3.CONTENT_TYPE_JSON)).andExpect(MockMvcResultMatchers.status().isOk());
-            String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-            Assert.assertFalse(responseBody.isEmpty());
-            Assert.assertEquals("{\"message\":\"A hiker has got lost\"," +
-                    "\"reportingOfficerName\":\"Joe Bloggs\"," +
-                    "\"lat\":51.508341," +
-                    "\"lng\":-0.125499," +
-                    "\"3wa\":\"daring.lion.race\"}", responseBody);
+                    .contentType(What3WordsV3.CONTENT_TYPE_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"A hiker has got lost\"," +
+                            "\"reportingOfficerName\":\"Joe Bloggs\"," +
+                            "\"lat\":51.508341," +
+                            "\"lng\":-0.125499," +
+                            "\"3wa\":\"daring.lion.race\"}"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -107,7 +102,7 @@ public class IntegrationTestSuite {
     @Test
     public void testEmergencyReport_GetLatFilledForLong3Wa() {
         try {
-            ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_EMERGENCY_REPORT_PATH).
+            mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_EMERGENCY_REPORT_PATH).
                     content("{" +
                             "\"message\":\"A hiker has got lost\"," +
                             "\"lat\": null," +
@@ -115,16 +110,14 @@ public class IntegrationTestSuite {
                             "\"3wa\": \"daring.lion.race\"," +
                             "\"reportingOfficerName\": \"Joe Bloggs\"" +
                             "}")
-                    .contentType(What3WordsV3.CONTENT_TYPE_JSON)).andExpect(MockMvcResultMatchers.status().isOk());
-            String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-            Assert.assertFalse(responseBody.isEmpty());
-            Assert.assertEquals("{" +
-                    "\"message\":\"A hiker has got lost\"," +
-                    "\"lat\": 51.508341," +
-                    "\"lng\":-0.125499," +
-                    "\"3wa\": \"daring.lion.race\"," +
-                    "\"reportingOfficerName\": \"Joe Bloggs\"" +
-                    "}", responseBody);
+                    .contentType(What3WordsV3.CONTENT_TYPE_JSON)).andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().json("{" +
+                            "\"message\":\"A hiker has got lost\"," +
+                            "\"lat\": 51.508341," +
+                            "\"lng\":-0.125499," +
+                            "\"3wa\": \"daring.lion.race\"," +
+                            "\"reportingOfficerName\": \"Joe Bloggs\"" +
+                            "}"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -142,14 +135,13 @@ public class IntegrationTestSuite {
                             "\"3wa\": \"daring.lion.race\"," +
                             "\"reportingOfficerName\": \"Joe Bloggs\"" +
                             "}")
-                    .contentType(What3WordsV3.CONTENT_TYPE_JSON)).andExpect(MockMvcResultMatchers.status().isOk());
-            String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-            Assert.assertFalse(responseBody.isEmpty());
-            Assert.assertEquals("{\"message\":\"A hiker has got lost\"," +
-                    "\"reportingOfficerName\":\"Joe Bloggs\"," +
-                    "\"lat\":51.508341," +
-                    "\"lng\":-0.125499," +
-                    "\"3wa\":\"daring.lion.race\"}", responseBody);
+                    .contentType(What3WordsV3.CONTENT_TYPE_JSON))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"A hiker has got lost\"," +
+                            "\"reportingOfficerName\":\"Joe Bloggs\"," +
+                            "\"lat\":51.508341," +
+                            "\"lng\":-0.125499," +
+                            "\"3wa\":\"daring.lion.race\"}"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -159,7 +151,7 @@ public class IntegrationTestSuite {
     @Test
     public void testEmergencyReport_ErrorScenario_Invalid3wa_SuggestionResponse() {
         try {
-            ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_EMERGENCY_REPORT_PATH).
+            mockMvc.perform(MockMvcRequestBuilders.post(ApplicationUtil.ENDPOINT_EMERGENCY_REPORT_PATH).
                     content("{" +
                             "\"message\":\"A hiker has got lost\"," +
                             "\"lat\": null," +
@@ -167,16 +159,14 @@ public class IntegrationTestSuite {
                             "\"3wa\": \"filled.count.smap\"," +
                             "\"reportingOfficerName\": \"Joe Bloggs\"" +
                             "}")
-                    .contentType(What3WordsV3.CONTENT_TYPE_JSON)).andExpect(MockMvcResultMatchers.status().isOk());
-            String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-            Assert.assertFalse(responseBody.isEmpty());
-            String expected = "{\"message\":\"3wa not recognised: filled.count.smap\"," +
-                    "\"suggestions\":[" +
-                    "{\"country\":\"GB\",\"nearestPlace\":\"Bayswater, London\",\"words\":\"filled.count.soap\"}," +
-                    "{\"country\":\"GB\",\"nearestPlace\":\"Wednesfield, W. Midlands\",\"words\":\"filled.count.slap\"}," +
-                    "{\"country\":\"GB\",\"nearestPlace\":\"Clayton-le-Woods, Lancs.\",\"words\":\"filled.count.same\"}" +
-                    "]}";
-            Assert.assertEquals(expected, responseBody);
+                    .contentType(What3WordsV3.CONTENT_TYPE_JSON))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.content().json("{\"message\":\"3wa not recognised: filled.count.smap\"," +
+                            "\"suggestions\":[" +
+                            "{\"country\":\"GB\",\"nearestPlace\":\"Bayswater, London\",\"words\":\"filled.count.soap\"}," +
+                            "{\"country\":\"GB\",\"nearestPlace\":\"Wednesfield, W. Midlands\",\"words\":\"filled.count.slap\"}," +
+                            "{\"country\":\"GB\",\"nearestPlace\":\"Clayton-le-Woods, Lancs.\",\"words\":\"filled.count.same\"}" +
+                            "]}"));
         } catch (Exception e) {
             e.printStackTrace();
         }
