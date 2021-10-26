@@ -24,6 +24,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/*
+ * What3WordsService is responsible for performing the requested EmergencyAlert based operation by invoking one or more What3WordsV3 API calls.
+ *
+ * @author Rajagopal
+ * */
 @Service
 @Slf4j
 public class What3WordsService {
@@ -31,6 +36,21 @@ public class What3WordsService {
     @Autowired
     What3WordsWrapper what3WordsWrapper;
 
+    /*
+    * This method CheckAndConvert3WaBetween2GivenLanguages takes care of converting the given 3wa from oneLangage to another by identifying which of the 2 languages in which the word is sent.
+    * Following are the steps to identify the language and convert to the other
+    * 1. Assume the given word is in firstLanguage, Make an auto suggest call in firstLanguage
+    * 2. See if the given word is in the part of the suggestions received
+    *   2a. If yes, then the given word is in firstLanguage hence need to convert to secondLanguage hence point the instance to AutoSuggest
+    *   2b. Else the word might be in secondLanguage but should validate and fetch the appropriate suggestions and point to AutoSuggest
+    * 3. For the appropriate AutoSuggest get the CoOrdinates from the given correct 3wa in that region
+    * 4. From the CoOrdinates get the other language 3wa bases upon the language identified to switch/convert to.
+    *
+    * @param input the 3wa string which should be converted
+    * @param firstLanguage that is involved in the process
+    * @param secondLanguage that should be involved in the process.
+    * @return the converted 3wa String in the other language or any error based up on the point of failure.
+    * */
     public String checkAndConvert3WaBetween2GivenLanguages(String input, String firstLanguage, String secondLanguage) {
         if (ApplicationUtil.validate3WaString(input)) {
             String toLang = secondLanguage;
@@ -80,6 +100,18 @@ public class What3WordsService {
         }
     }
 
+    /*
+    * Method CheckAndFillMissing3WaInfoForCoordinates is used to check and fill missing emergency info or to provide suggestions for a wrongly spelled 3wa string.
+    * The steps are as follows :
+    * 1. Check if the request either has missing 3wa or missing Coordinates.
+    *   2a. if yes, check if the request has blank 3wa then fetch the 3wa for given CoOrdinates.
+    *   2b. if not, check if the request has either of the CoOrdinates missing then fetch the CoOrdinates for the given string.
+    * 3. If the request is valid but the word is not grammatically correct then invoke auto suggest to give appropriate 3wa strings.
+    *
+    * @param EmergencyReportsInfoDTO object with either CoOrdinates or 3wa String missing.
+    *
+    * @return Map.Entry<EmergencyReportsInfoDTO, EmergencyReportsSuggestionDTO> containing either the filled object or auto suggestions for a wrongly spelled 3wa string.
+    * */
     public Map.Entry<EmergencyReportsInfoDTO, EmergencyReportsSuggestionDTO> checkAndFillMissing3WaInfoForCoordinates(EmergencyReportsInfoDTO infoDTO) {
         EmergencyReportsSuggestionDTO emergencyReportsSuggestionDTO = new EmergencyReportsSuggestionDTO();
         if(!ApplicationUtil.validateEmergencyReportsRequest(infoDTO)) {
