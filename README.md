@@ -63,7 +63,7 @@ Content-Type: application/json
 
 Content-Type: application/json;charset=UTF-8
 {
-    "message":"3wa address supplied has invalid format"
+    "message": "3wa not recognised: filled.count.asd12"
 }
 ```
 
@@ -153,12 +153,30 @@ Content-Type: application/json;charset=UTF-8
     ]
 }
 ```
-
+OR 
 ```http
-HTTP/1.1 402
+HTTP/1.1 422 UNPROCESSABLE ENTITY
 Content-Type: application/json;charset=UTF-8
 {
-    "message":"3wa address supplied has invalid format"
+    "message": "Invalid Request!"
+}
+```
+
+
+```http
+HTTP/1.1 402 INVALID REQUEST
+Content-Type: application/json;charset=UTF-8
+{
+    "message": "3wa not recognised: filled.count.asd12"
+}
+```
+
+
+```http
+HTTP/1.1 500 SERVICE ERROR
+Content-Type: application/json;charset=UTF-8
+{
+    "message": "3wa not recognised: filled.count.asd12"
 }
 ```
 

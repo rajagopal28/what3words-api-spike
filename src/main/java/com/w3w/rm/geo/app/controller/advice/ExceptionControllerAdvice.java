@@ -104,8 +104,8 @@ public class ExceptionControllerAdvice extends ResponseEntityExceptionHandler {
         @JsonInclude(JsonInclude.Include.NON_NULL)
         private final Object details;
 
-        public static ServiceError from(RuntimeException paymentException) {
-            return new ServiceError(paymentException.getMessage(), paymentException.getCause());
+        public static ServiceError from(RuntimeException ex) {
+            return new ServiceError(ex.getMessage(), ex.getCause());
         }
 
         public static ServiceError from(MethodArgumentNotValidException ex) {
