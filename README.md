@@ -111,7 +111,7 @@ Host: localhost:8080
 
 
 ##### Response
-Returns: The filled location report for request posted to the endpoint. 
+Returns: The filled location report for request posted to the endpoint.
 Or if the 3wa is not grammatically correct, then the suggestions closer to the given 3wa.
 
 ```http
@@ -171,11 +171,6 @@ Returns the appropriate response for the location information passed.
 
 503 – if the API invocation to What3Words external service fails.
 
-```http
-HTTP/1.1 204
-
-```
-
 ### Test Coverage
 ![TestCoverage](./images/test-coverage-1.png)
 ![TestCoverage](./images/test-coverage-2.png)
@@ -221,7 +216,7 @@ $ mvn  test
     - https://stackoverflow.com/questions/20504399/testing-springs-requestbody-using-spring-mockmvc
     - using wiremock : https://stackoverflow.com/a/40908543
     - using easymock: https://stackoverflow.com/a/61685017
-  
+- assert json content in mvc testing : https://stackoverflow.com/a/41670634
 
 
 ## License
