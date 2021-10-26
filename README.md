@@ -1,156 +1,229 @@
-# Preparation
+# Emergency Report REST API Powered by What3Words
 
-Install:
+This is a Java based REST application which intends performing emergency alerting using what3words API.
+It is a minimal Proof of concept that adheres to the requirements mentioned in [Here](./Requirements.md)
 
-- Git
-- IDE of your choice
+### Key aspects related to implementation:
+- Employing test driven development practice while building application - Each module goes through the `red` -> `fix` -> `green` -> `refactor` cycle
+- Intensive unit tests - Mocktio based unit tests to observe interactions of various actors
+- Separation of concerns - Modular approach on top of MVC paradigm in giving specific responsibility to each modules in the application
+    - *Service layer* to handle data persistence and business logics required to invoke the what3words api with the location data supplied
+    - *Controller* to handle all the endpoint calls to process the data from users.
+    - *Models* to keep track of data that is processed by the system.
+    - *ControllerAdvice* to handle all the user defined exceptions handled at the runtime to send proper response code to users to better understand the flow.
+- Dependency resolution with Spring-Boot's Auto-configuration and dependency resolution.
+- MVC test to support integration testing of the entire Spring Application.
+- Lombok - used annotation based pre-processing to reduce a lot of boilerplate code that can be deferred to compile time.
 
-## Overview
 
-There is no time limit for this test, however, we would typically expect candidates to spend a couple of hours implementing their solution.
+## TDD - Red->Green->Refactor cycle
+![TDD Diagram](./images/red-green-refactor.png)
 
-Once you have completed the task, please push your work back up to the github repository in a branch called `solution`.
+## REST APIs
 
-# Task
+#### Convert from English to Welsh
+##### Request
+```http
+POST /emergency-api/welsh-convert HTTP/1.1
+Host: localhost:8080
+Content-Type: application/json
 
-An emergency service is looking to build a restful API for emergency reporting.
-One of the desired features of this is to use the w3w API for converting coordinates into three word addresses
-and converting three word addresses into coordinates.
+{
+    "3wa": "daring.lion.race"
+}
+```
+### Request format:
+*3wa* – the input 3wa string to be converted to the other language.
 
-As technical requirements they want to use Java and Spring Boot to do this.
+##### Response
+Returns: Empty converted 3wa in to the other language:
 
-You can find the API reference for the what3words API here:
-[https://developer.what3words.com/public-api/docs#overview](https://developer.what3words.com/public-api/docs#overview)
+200 – in case of success
 
-There is also a java wrapper which you can use here:
-[https://developer.what3words.com/tutorial/java](https://developer.what3words.com/tutorial/java)
+400 – if the 3wa is invalid
 
-To save time we have created the api key: `92RKJSSS` for use in this application.
+503 – if the API invocation to What3Words external service fails.
 
-API endpoints: The API will need to receive and respond in JSON.
 
-## 1.
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
 
-**An endpoint that takes the report information, validates it and fills in the missing information.**
+{
+    "3wa": "sychach.parciau.lwmpyn"
+}
 
-Validation
+```
 
-The endpoint should implement the `POST` method, and accept either latitude (lat) + longitude (lng) or 3 word address (3wa) or both as JSON, as per the below.
+OR
 
-If the lat, lng aren't present use the w3w API to get this. If the 3wa isn't present use the lat, lng to get this. If none are present return an error.
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
 
-Also if a 3wa is supplied but it is not a valid 3wa return an error. This page may be useful for this: [https://developer.what3words.com/tutorial/detecting-if-text-is-in-the-format-of-a-3-word-address](https://developer.what3words.com/tutorial/detecting-if-text-is-in-the-format-of-a-3-word-address)
+Content-Type: application/json;charset=UTF-8
+{
+    "message":"3wa address supplied has invalid format"
+}
+```
 
-This emergency service is also based in the UK so the API should not accept addresses from outside the UK.
 
-If the lat, lng somehow don't return a 3wa when trying to convert return an error
+#### Get Report filled with missing info
+##### Request
+```http
+POST /emergency-api/reports HTTP/1.1
+Host: localhost:8080
 
-If a 3wa is provided but doesn't meet the validation criteria, try using [https://developer.what3words.com/public-api/docs#autosuggest](https://developer.what3words.com/public-api/docs#autosuggest)
-if this does return results, return 3 suggestions in the error response
+{
+    "message":"A hiker has got lost",
+    "lat": null,
+    "lng":null,
+    "3wa": "daring.lion.race",
+    "reportingOfficerName": "Joe Bloggs"
+}
 
-### Examples
+```
 
-Request:
+OR
 
-localhost:8080/emergencyapi/reports
+```http
+POST /emergency-api/reports HTTP/1.1
+Host: localhost:8080
 
-    {
-        "message":"A hiker has got lost",
-        "lat": null,
-        "lng":null,
-        "3wa": "daring.lion.race",
-        "reportingOfficerName": "Joe Bloggs"
-    }
+{
+    "message":"A hiker has got lost",
+    "lat": 51.508341,
+    "lng":-0.125499,
+    "3wa": null,
+    "reportingOfficerName": "Joe Bloggs"
+}
 
-or
+```
 
-    {
-        "message":"A hiker has got lost",
-        "lat": 51.508341,
-        "lng":-0.125499,
-        "3wa": null,
-        "reportingOfficerName": "Joe Bloggs"
-    }
 
-Response:
+### Request format:
+*message* – the input message related to the emergency reported.
+*lat* – the input location latitude value.
+*lng* – the input location longitude value.
+*3wa* – the input 3wa string to be converted to the other language.
+*reportingOfficerName* – the name of the reporting person from the location.
 
-    {
-        "message":"A hiker has got lost",
-        "lat": 51.508341,
-        "lng":-0.125499,
-        "3wa": "daring.lion.race",
-        "reportingOfficerName": "Joe Bloggs"
-    }
 
-Error response:
 
-    {
-        "message":"3wa address supplied has invalid format"
-    }
+##### Response
+Returns: The filled location report for request posted to the endpoint. 
+Or if the 3wa is not grammatically correct, then the suggestions closer to the given 3wa.
 
-Error response:
+```http
+HTTP/1.1 200
+Content-Type: application/json;charset=UTF-8
 
-    {
-        "message":"3wa not recognised: filled.count.snap",
-        "suggestions": [
-            {
-                "country": "GB",
-                "nearestPlace": "Bayswater, London",
-                "words": "filled.count.soap"
-            },
-            {
-                "country": "GB",
-                "nearestPlace": "Wednesfield, W. Midlands",
-                "words": "filled.count.slap"
-            },
-            {
-                "country": "GB",
-                "nearestPlace": "Orsett, Thurrock",
-                "words": "fills.count.slap"
-            }
-        ]
-    }
+{
+    "message":"A hiker has got lost",
+    "lat": 51.508341,
+    "lng":-0.125499,
+    "3wa": "daring.lion.race",
+    "reportingOfficerName": "Joe Bloggs"
+}
+```
+OR
 
-## 2.
 
-**An endpoint that returns the equivalent Welsh 3wa to a location when submitted to in English and vice versa.**
+```http
+HTTP/1.1 200
+Content-Type: application/json;charset=UTF-8
+{
+    "message":"3wa not recognised: filled.count.snap",
+    "suggestions": [
+        {
+            "country": "GB",
+            "nearestPlace": "Bayswater, London",
+            "words": "filled.count.soap"
+        },
+        {
+            "country": "GB",
+            "nearestPlace": "Wednesfield, W. Midlands",
+            "words": "filled.count.slap"
+        },
+        {
+            "country": "GB",
+            "nearestPlace": "Orsett, Thurrock",
+            "words": "fills.count.slap"
+        }
+    ]
+}
+```
 
-The endpoint should implement the POST method, and accept a 3wa as JSON, as per the below.
+```http
+HTTP/1.1 402
+Content-Type: application/json;charset=UTF-8
+{
+    "message":"3wa address supplied has invalid format"
+}
+```
 
-### Validation
+##### Response
+Returns the appropriate response for the location information passed.
 
-Similar validation as above, try and make sure the 3wa is of a valid format and is within the bounds of the UK
+200 – in case of success
 
-### Examples
+400 – if the 3wa is invalid
 
-Request:
-`localhost:8080/emergencyapi/welsh-convert`
+503 – if the API invocation to What3Words external service fails.
 
-    {
-        "3wa": "daring.lion.race"
-    }
+```http
+HTTP/1.1 204
 
-Response:
+```
 
-    {
-        "3wa": "sychach.parciau.lwmpyn"
-    }
+### Test Coverage
+![TestCoverage](./images/test-coverage-1.png)
+![TestCoverage](./images/test-coverage-2.png)
 
-or
 
-Request:
-`localhost:8080/emergencyapi/welsh-3wa`
+### Dependencies
+![Dependencies](./images/dependencies-1.png)
+![Dependencies](./images/dependencies-2.png)
 
-    {
-        "3wa": "sychach.parciau.lwmpyn"
-    }
+## Testing
+This application is build following TDD principles and are rich with various integration/unit tests based on test pyramids
+To run all the tests:
 
-Response:
+```bash
+mvn clean test
+```
 
-    {
-        "3wa": "daring.lion.race"
-    }
+## Build
+In order to build this application, run the following maven command.
+```bash
+mvn clean package
+```
+### installing the packages
+With Tests:
+```bash
+$ mvn clean install -U
+```
+### running tests
+Unit tests:
+```bash
+$ mvn  test
+```
 
-# Testing
+>         Developed in Jetbrain's IntelliJ IDE
 
-Please provide Junit test coverage to cover the use cases of both these endpoints
+## References
+ - mocktio failing for API class: https://stackoverflow.com/a/58200905
+ - json name setting: https://stackoverflow.com/q/40969156
+ - `handlerExceptionResolver` not found bean issue : https://stackoverflow.com/a/56121977
+ - json ignore fields: https://www.baeldung.com/jackson-ignore-null-fields
+ - integration testing: https://stackoverflow.com/a/35402975
+ - Mock external API call :
+    - https://stackoverflow.com/questions/20504399/testing-springs-requestbody-using-spring-mockmvc
+    - using wiremock : https://stackoverflow.com/a/40908543
+    - using easymock: https://stackoverflow.com/a/61685017
+  
+
+
+## License
+
+MIT
