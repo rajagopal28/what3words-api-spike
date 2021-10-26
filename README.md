@@ -76,8 +76,8 @@ Host: localhost:8080
 
 {
     "message":"A hiker has got lost",
-    "lat": null,
-    "lng":null,
+    /* "lat": null,
+    "lng":null, */
     "3wa": "daring.lion.race",
     "reportingOfficerName": "Joe Bloggs"
 }
@@ -115,7 +115,7 @@ Returns: The filled location report for request posted to the endpoint.
 Or if the 3wa is not grammatically correct, then the suggestions closer to the given 3wa.
 
 ```http
-// HTTP/1.1 200
+/* HTTP/1.1 200 */
 Content-Type: application/json;charset=UTF-8
 
 {
@@ -130,7 +130,7 @@ OR
 
 
 ```http
-// HTTP/1.1 200
+/* HTTP/1.1 200 */
 Content-Type: application/json;charset=UTF-8
 {
     "message":"3wa not recognised: filled.count.snap",
@@ -153,9 +153,9 @@ Content-Type: application/json;charset=UTF-8
     ]
 }
 ```
-OR 
+OR
 ```http
-// HTTP/1.1 422 UNPROCESSABLE ENTITY
+/* HTTP/1.1 422 UNPROCESSABLE ENTITY */
 Content-Type: application/json;charset=UTF-8
 {
     "message": "Invalid Request!"
@@ -164,7 +164,7 @@ Content-Type: application/json;charset=UTF-8
 
 
 ```http
-// HTTP/1.1 402 INVALID REQUEST
+/* HTTP/1.1 402 INVALID REQUEST */
 Content-Type: application/json;charset=UTF-8
 {
     "message": "3wa not recognised: filled.count.asd12"
@@ -173,7 +173,7 @@ Content-Type: application/json;charset=UTF-8
 
 
 ```http
-// HTTP/1.1 500 SERVICE ERROR
+/* HTTP/1.1 500 SERVICE ERROR */
 Content-Type: application/json;charset=UTF-8
 {
     "message": "3wa not recognised: filled.count.asd12"
