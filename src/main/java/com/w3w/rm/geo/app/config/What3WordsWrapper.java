@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component()
 public class What3WordsWrapper {
     // Eager initialisation of the singleton instance of What3WordsV3 API
-    private static What3WordsV3 API_INSTANCE = new What3WordsV3("92RKJSSS");
+    private static What3WordsV3 API_INSTANCE = new What3WordsV3("API-KEY-HERE");
 
     /**
      * Private constructor to block instantiation of the Wrapper class.
